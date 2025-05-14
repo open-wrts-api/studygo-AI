@@ -39,14 +39,14 @@ async function sgUpload(token, body, id) {
         "headers": {
             "Accept": "application/json, text/plain, */*",
             "Content-Type": "application/json",
-            "X-Auth-Token": token,
-            "X-Client-Type": "web",
-            "X-Language-Code": "nl",
-            "X-Locale-Code": "nl-NL",
-            "Priority": "u=0"
+            "X-Auth-Token": token
         },
-        "referrer": "https://studygo.com/",
-        "body": "{\"qna_answer\":{\"body\":\"" + body + "\",\"qna_attachments_attributes\":[]}}",
+        "body": JSON.stringify({
+            "qna_answer": {
+                "body": body,
+                "qna_attachments_attributes": []
+            }
+        }),
         "method": "POST",
         "mode": "cors"
     });

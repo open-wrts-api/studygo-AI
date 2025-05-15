@@ -17,7 +17,7 @@ async function get_token() {
         token_vernieuwen_datum = 1;
     }
 
-    if (token_vernieuwen_datum <= Number(Date.now().toString().slice(0, 10)) || negeer_token_vernieuwen_datum) {
+    if (token_vernieuwen_datum <= Number(Date.now().toString().slice(0, 10))) {
 
         const response = await fetch(
             "https://api.wrts.nl/api/v3/auth/get_token?email=" + gebruikersnaam + "&password=" + wachtwoord,

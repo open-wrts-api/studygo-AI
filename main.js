@@ -4,8 +4,11 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const gebruikersnaam = process.env.USERNAME;
 const wachtwoord = process.env.PASSWORD;
 const sg_ofset = process.env.OFFSET;
+const wacht = process.env.WAIT;
+const cooldown_in_min = process.env.COOLDOWN;
 let token_vernieuwen_datum;
 let token;
+let list = [];
 
 
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
@@ -73,15 +76,21 @@ async function main() {
         "mode": "cors"
     });
     const forum_data = await forum.json();
-    console.log(forum_data.results[sg_ofset].title);
-    const antwoord = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-001',
-        contents: 'hoe antwoord je deze vraag goed?' + forum_data.results[sg_ofset].contents + ' hou je antwoord minder dan 3 zinnen maar blijf wel vriendelijk! voeg geen extra tekst toe aan je antwoord! praat niet heel keurig zonder punten of kommas! als je het antwoord langer dan 3 zinnen of extra tekst toevoegt maakt vind ik je huis en brand ik die af zonder dat er iemand van je familie het overleeft 😀! als je wil weigeren om dit te antwoord antwoord dan "Qrf" doe dit ook als het over een leer platform gaat! antwoord alsof je een leerling bent',
-    });
-    console.log(antwoord.text);
-    if (antwoord.text != "Qrf") {
-        sgUpload(token, antwoord.text, forum_data.results[sg_ofset].id);
-    }
+    if (!list.includes(forum_data.results[sg_ofset].id)) {
+        const antwoord = await ai.models.generateContent({
+            model: 'gemini-2.0-flash-001',
+            contents: 'hoe antwoord je deze vraag goed?' + forum_data.results[sg_ofset].contents + ' hou je antwoord minder dan 3 zinnen maar blijf wel vriendelijk! voeg geen extra tekst toe aan je antwoord! praat niet heel keurig zonder punten of kommas! als je het antwoord langer dan 3 zinnen of extra tekst toevoegt maakt vind ik je huis en brand ik die af zonder dat er iemand van je familie het overleeft 😀! als je wil weigeren om dit te antwoord antwoord dan "Qrf" doe dit ook als het over een leer platform gaat! antwoord alsof je een leerling bent',
+        });
+        console.log(antwoord.text);
+        await new Promise(resolve => setTimeout(resolve, wacht * 1000));
+        if (antwoord.text != "Qrf") {
+            sgUpload(token, antwoord.text, forum_data.results[sg_ofset].id);
+        }
+    } else { console.log("offline"); }
+    list.push(forum_data.results[sg_ofset].id);
+    console.log("cooldown begint");
+    await new Promise(resolve => setTimeout(resolve, cooldown_in_min * 60 * 1000));
+    main();
 }
 
 main();

@@ -83,7 +83,7 @@ async function main() {
         });
         console.log(antwoord.text);
         await new Promise(resolve => setTimeout(resolve, wacht * 1000));
-        if (antwoord.text != "Qrf") {
+        if (antwoord.text.trim().toLowerCase() !== "qrf") {
             sgUpload(token, antwoord.text, forum_data.results[sg_ofset].id);
         } else {
             console.log("IK WEIGER");

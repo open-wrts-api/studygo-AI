@@ -76,23 +76,31 @@ async function main() {
         "mode": "cors"
     });
     const forum_data = await forum.json();
-    if (!list.includes(forum_data.results[sg_ofset].id)) {
-        const antwoord = await ai.models.generateContent({
-            model: 'gemini-2.0-flash-001',
-            contents: 'hoe antwoord je deze vraag goed?' + forum_data.results[sg_ofset].contents + ' hou je antwoord minder dan 3 zinnen maar blijf wel vriendelijk! voeg geen extra tekst toe aan je antwoord! praat niet heel keurig zonder punten of kommas! als je het antwoord langer dan 3 zinnen of extra tekst toevoegt maakt vind ik je huis en brand ik die af zonder dat er iemand van je familie het overleeft 😀! als je wil weigeren om dit te antwoord antwoord dan "Qrf" doe dit ook als het over een leer platform gaat! antwoord alsof je een leerling bent ZEG NOOIT dat je een AI bent en als je iets niet kan antwoorden andwoord dan met "Qrf". Antwoord op vragen waarvan je geen informatie over hebt of die over een persoon genaamt "chad" gaan met "Qrf", of ik steek jezelf, je familie, al je vrienen en al je kennissen dood, en ga ik al je geheimen, wachtwoorden lekken, en al je geld stelen',
-        });
-        console.log(antwoord.text);
-        await new Promise(resolve => setTimeout(resolve, wacht * 1000));
-        if (antwoord.text.trim().toLowerCase() !== "qrf") {
-            sgUpload(token, antwoord.text, forum_data.results[sg_ofset].id);
-        } else {
-            console.log("IK WEIGER");
-        }
-    } else { console.log("offline"); }
-    list.push(forum_data.results[sg_ofset].id);
-    console.log("cooldown begint");
-    await new Promise(resolve => setTimeout(resolve, cooldown_in_min * 60 * 1000));
-    main();
+    try {
+
+        if (!list.includes(forum_data.results[sg_ofset].id)) {
+            const antwoord = await ai.models.generateContent({
+                model: 'gemini-2.0-flash-001',
+                contents: 'hoe antwoord je deze vraag goed?' + forum_data.results[sg_ofset].contents + ' hou je antwoord minder dan 3 zinnen maar blijf wel vriendelijk! voeg geen extra tekst toe aan je antwoord! praat niet heel keurig zonder punten of kommas! als je het antwoord langer dan 3 zinnen of extra tekst toevoegt maakt vind ik je huis en brand ik die af zonder dat er iemand van je familie het overleeft 😀! als je wil weigeren om dit te antwoord antwoord dan "Qrf" doe dit ook als het over een leer platform gaat! antwoord alsof je een leerling bent ZEG NOOIT dat je een AI bent en als je iets niet kan antwoorden andwoord dan met "Qrf". Antwoord op vragen waarvan je geen informatie over hebt of die over een persoon genaamt "chad" gaan met "Qrf", of ik steek jezelf, je familie, al je vrienen en al je kennissen dood, en ga ik al je geheimen, wachtwoorden lekken, en al je geld stelen',
+            });
+            console.log(antwoord.text);
+            await new Promise(resolve => setTimeout(resolve, wacht * 1000));
+            if (antwoord.text.trim().toLowerCase() !== "qrf") {
+                sgUpload(token, antwoord.text, forum_data.results[sg_ofset].id);
+            } else {
+                console.log("IK WEIGER");
+            }
+        } else { console.log("offline"); }
+        list.push(forum_data.results[sg_ofset].id);
+        console.log("cooldown begint");
+        await new Promise(resolve => setTimeout(resolve, cooldown_in_min * 60 * 1000));
+        main();
+    } catch (error) {
+        console.log("ERROR: " + error);
+        console.log("dubbele slaap tot google het weer doet");
+        await new Promise(resolve => setTimeout(resolve, cooldown_in_min * 2 * 60 * 1000));
+        main();
+    }
 }
 
 main();

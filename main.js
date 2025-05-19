@@ -64,19 +64,19 @@ async function sgUpload(token, body, id) {
 
 }
 async function main() {
-    token = await get_token();
-    const forum = await fetch("https://api.wrts.nl/api/v3/public/qna/questions", {
-        "credentials": "omit",
-        "headers": {
-            "Accept": "application/json, text/plain, */*",
-            "X-Auth-Token": await token,
-        },
-        "referrer": "https://studygo.com/",
-        "method": "GET",
-        "mode": "cors"
-    });
-    const forum_data = await forum.json();
     try {
+        token = await get_token();
+        const forum = await fetch("https://api.wrts.nl/api/v3/public/qna/questions", {
+            "credentials": "omit",
+            "headers": {
+                "Accept": "application/json, text/plain, */*",
+                "X-Auth-Token": await token,
+            },
+            "referrer": "https://studygo.com/",
+            "method": "GET",
+            "mode": "cors"
+        });
+        const forum_data = await forum.json();
 
         if (!list.includes(forum_data.results[sg_ofset].id)) {
             const antwoord = await ai.models.generateContent({
@@ -97,7 +97,7 @@ async function main() {
         main();
     } catch (error) {
         console.log("ERROR: " + error);
-        console.log("dubbele slaap tot google het weer doet");
+        console.log("dubbele slaap tot de error weg is....");
         await new Promise(resolve => setTimeout(resolve, cooldown_in_min * 2 * 60 * 1000));
         main();
     }

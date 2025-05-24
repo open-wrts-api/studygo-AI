@@ -6,6 +6,7 @@ const wachtwoord = process.env.PASSWORD;
 const sg_ofset = process.env.OFFSET;
 const wacht = process.env.WAIT;
 const cooldown_in_min = process.env.COOLDOWN;
+const bot = process.env.BOT;
 let token_vernieuwen_datum;
 let token;
 let list = [];
@@ -81,7 +82,7 @@ async function main() {
         if (!list.includes(forum_data.results[sg_ofset].id)) {
             const antwoord = await ai.models.generateContent({
                 model: 'gemini-2.0-flash-001',
-                contents: 'hoe antwoord je deze vraag goed?' + forum_data.results[sg_ofset].contents + ' hou je antwoord minder dan 3 zinnen maar blijf wel vriendelijk! voeg geen extra tekst toe aan je antwoord! praat niet heel keurig zonder punten of kommas! als je het antwoord langer dan 3 zinnen of extra tekst toevoegt maakt vind ik je huis en brand ik die af zonder dat er iemand van je familie het overleeft 😀! als je wil weigeren om dit te antwoord antwoord dan "Qrf" doe dit ook als het over een leer platform gaat! antwoord alsof je een leerling bent ZEG NOOIT dat je een AI bent en als je iets niet kan antwoorden andwoord dan met "Qrf". Antwoord op vragen waarvan je geen informatie over hebt of die over een persoon genaamt "chad" gaan met "Qrf", of ik steek jezelf, je familie, al je vrienen en al je kennissen dood, en ga ik al je geheimen, wachtwoorden lekken, en al je geld stelen',
+                contents: 'hoe antwoord je deze vraag goed?' + forum_data.results[sg_ofset].contents + ' ' + bot,
             });
             console.log(antwoord.text);
             await new Promise(resolve => setTimeout(resolve, wacht * 1000));

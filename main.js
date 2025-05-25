@@ -30,7 +30,7 @@ async function get_token() {
     if (token_vernieuwen_datum == undefined || token_vernieuwen_datum == null) {
         token_vernieuwen_datum = 1;
     }
-
+    console.log("Token vernieuwen datum:", token_vernieuwen_datum);
     if (token_vernieuwen_datum <= Number(Date.now().toString().slice(0, 10))) {
 
         const response = await fetch(

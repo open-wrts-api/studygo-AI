@@ -64,6 +64,7 @@ async function sgUpload(token, body, id) {
     } else {
         console.log("Failed to post answer:", response.status);
     }
+    return response.status;
 
 }
 async function main() {
@@ -97,8 +98,14 @@ async function main() {
             console.log(antwoord.text);
             await new Promise(resolve => setTimeout(resolve, wacht * 1000));
             if (antwoord.text.trim().toLowerCase() !== "qrf") {
-                sgUpload(token, antwoord.text, forum_data.results[sg_ofset].id);
-                hook.success('Success', 'Antwoord gepost', 'De bot heeft succesvol een antwoord gepost op [deze](https://studygo.com/nl/learn/question/' + forum_data.results[sg_ofset].id + '/) vraag.');
+                staat = sgUpload(token, antwoord.text, forum_data.results[sg_ofset].id);
+                if (staat === 201) {
+                    hook.success('Success', 'Antwoord gepost', 'De bot heeft succesvol een antwoord gepost op [deze](https://studygo.com/nl/learn/question/' + forum_data.results[sg_ofset].id + '/) vraag.');
+                }
+                if (staat === 404) {
+                    console.log("ACCOUNT DOOD");
+                    hook.error('Error', 'ACCOUNT DOOD', 'De bot waarschijnlijk is verbannen van studygo.');
+                }
             } else {
                 console.log("IK WEIGER");
                 hook.info('Information', 'IK WEIGER', 'De bot weigert om [deze](https://studygo.com/nl/learn/question/' + forum_data.results[sg_ofset].id + '/) vraag te beantwoorden.');

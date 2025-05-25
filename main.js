@@ -33,14 +33,7 @@ async function get_token() {
     console.log("Token vernieuwen datum:", token_vernieuwen_datum);
     if (token_vernieuwen_datum <= Number(Date.now().toString().slice(0, 10))) {
 
-        const response = await fetch(
-            "https://api.wrts.nl/api/v3/auth/get_token?email=" + gebruikersnaam + "&password=" + wachtwoord,
-            {
-                method: "POST",
-                redirect: "follow"
-            }
-        );
-        await fetch("https://api.wrts.nl/api/v3/auth/get_token", {
+        const response = await fetch("https://api.wrts.nl/api/v3/auth/get_token", {
             "credentials": "omit",
             "headers": {
                 "Accept": "application/json, text/plain, */*",

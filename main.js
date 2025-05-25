@@ -40,6 +40,19 @@ async function get_token() {
                 redirect: "follow"
             }
         );
+        await fetch("https://api.wrts.nl/api/v3/auth/get_token", {
+            "credentials": "omit",
+            "headers": {
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Content-Type": "application/json",
+                "X-Client-Type": "web"
+            },
+            "referrer": "https://studygo.com/",
+            "body": "{\"email\":\"" + gebruikersnaam + "\",\"password\":\"" + wachtwoord + "\"}",
+            "method": "POST",
+            "mode": "cors"
+        });
         console.log("response:", response);
         const result = await response.json();
 

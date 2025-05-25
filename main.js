@@ -40,7 +40,7 @@ async function get_token() {
                 redirect: "follow"
             }
         );
-
+        console.log("response:", response);
         const result = await response.json();
 
         // Update localStorage

@@ -99,13 +99,12 @@ async function main() {
             await new Promise(resolve => setTimeout(resolve, wacht * 1000));
             if (antwoord.text.trim().toLowerCase() !== "qrf") {
                 const staat = await sgUpload(token, antwoord.text, forum_data.results[sg_ofset].id);
-                if (staat === 201) {
-                    hook.success('Success', 'Antwoord gepost', 'De bot heeft succesvol een antwoord gepost op [deze](https://studygo.com/nl/learn/question/' + forum_data.results[sg_ofset].id + '/) vraag.');
-                }
                 if (staat === 404) {
                     console.log("ACCOUNT DOOD");
                     hook.error('Error', 'ACCOUNT DOOD', 'De bot waarschijnlijk is verbannen van studygo.');
                     return;
+                } else {
+                    hook.success('Success', 'Antwoord gepost', 'De bot heeft succesvol een antwoord gepost op [deze](https://studygo.com/nl/learn/question/' + forum_data.results[sg_ofset].id + '/) vraag.');
                 }
             } else {
                 console.log("IK WEIGER");

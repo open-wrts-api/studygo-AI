@@ -27,7 +27,7 @@ const promptNaam = [
 
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 async function get_token() {
-    if (token_vernieuwen_datum == null) {
+    if (token_vernieuwen_datum == undefined || token_vernieuwen_datum == null) {
         token_vernieuwen_datum = 1;
     }
 

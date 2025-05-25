@@ -10,6 +10,8 @@ const bot = process.env.BOT;
 let token_vernieuwen_datum;
 let token;
 let list = [];
+import { Webhook } from 'discord-webhook-node';
+const hook = new Webhook(process.env.DC);
 
 
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
@@ -77,6 +79,14 @@ async function main() {
             "method": "GET",
             "mode": "cors"
         });
+
+        if (!forum.ok) {
+            throw new Error(`HTTP error! status: ${forum.status}`);
+        }
+        if (forum.status === 404) {
+            console.log("ACCOUNT DOOD");
+            hook.error('Error', 'ACCOUNT DOOD', 'De bot waarschijnlijk is verbannen van studygo.');
+        }
         const forum_data = await forum.json();
 
         if (!list.includes(forum_data.results[sg_ofset].id)) {
@@ -88,8 +98,10 @@ async function main() {
             await new Promise(resolve => setTimeout(resolve, wacht * 1000));
             if (antwoord.text.trim().toLowerCase() !== "qrf") {
                 sgUpload(token, antwoord.text, forum_data.results[sg_ofset].id);
+                hook.success('Success', 'Antwoord gepost', 'De bot heeft succesvol een antwoord gepost op [deze](https://studygo.com/nl/learn/question/' + forum_data.results[sg_ofset].id + '/) vraag.');
             } else {
                 console.log("IK WEIGER");
+                hook.info('Information', 'IK WEIGER', 'De bot weigert om [deze](https://studygo.com/nl/learn/question/' + forum_data.results[sg_ofset].id + '/) vraag te beantwoorden.');
             }
         } else { console.log("offline"); }
         list.push(forum_data.results[sg_ofset].id);
@@ -98,10 +110,11 @@ async function main() {
         main();
     } catch (error) {
         console.log("ERROR: " + error);
+        hook.warning('Waarschuwing', 'Er is een fout opgetreden waarschijnlijk door een error bij Google, er zal een dubbele wachttijd zijn', error.message);
         console.log("dubbele slaap tot de error weg is....");
         await new Promise(resolve => setTimeout(resolve, cooldown_in_min * 2 * 60 * 1000));
         main();
     }
 }
-
+hook.info('Informatie', 'De bot is gestart', 'De bot is succesvol gestart en wacht op nieuwe vragen.');
 main();

@@ -11,6 +11,9 @@ importers:
       '@google/genai':
         specifier: ^0.14.0
         version: 0.14.0
+      discord-webhook-node:
+        specifier: ^1.1.8
+        version: 1.1.8
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
@@ -74,6 +77,9 @@ packages:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
 
+  discord-webhook-node@1.1.8:
+    resolution: {integrity: sha512-3u0rrwywwYGc6HrgYirN/9gkBYqmdpvReyQjapoXARAHi0P0fIyf3W5tS5i3U3cc7e44E+e7dIHYUeec7yWaug==}
+
   dotenv@16.5.0:
     resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
     engines: {node: '>=12'}
@@ -123,6 +129,10 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
+
+  form-data@3.0.3:
+    resolution: {integrity: sha512-q5YBMeWy6E2Un0nMGWMgI65MAKtaylxfNJGJxpGh45YDciZB4epbWpaAfImil6CPAPTYB4sh0URQNDRIZG5F2w==}
+    engines: {node: '>= 6'}
 
   form-data@4.0.2:
     resolution: {integrity: sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==}
@@ -371,6 +381,13 @@ snapshots:
 
   delayed-stream@1.0.0: {}
 
+  discord-webhook-node@1.1.8:
+    dependencies:
+      form-data: 3.0.3
+      node-fetch: 2.7.0
+    transitivePeerDependencies:
+      - encoding
+
   dotenv@16.5.0: {}
 
   dunder-proto@1.0.1:
@@ -419,6 +436,13 @@ snapshots:
       pend: 1.2.0
 
   follow-redirects@1.15.9: {}
+
+  form-data@3.0.3:
+    dependencies:
+      asynckit: 0.4.0
+      combined-stream: 1.0.8
+      es-set-tostringtag: 2.1.0
+      mime-types: 2.1.35
 
   form-data@4.0.2:
     dependencies:

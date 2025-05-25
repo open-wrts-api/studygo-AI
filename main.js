@@ -105,6 +105,7 @@ async function main() {
                 if (staat === 404) {
                     console.log("ACCOUNT DOOD");
                     hook.error('Error', 'ACCOUNT DOOD', 'De bot waarschijnlijk is verbannen van studygo.');
+                    return;
                 }
             } else {
                 console.log("IK WEIGER");

@@ -36,10 +36,20 @@ async function get_token() {
         const response = await fetch("https://api.wrts.nl/api/v3/auth/get_token", {
             "credentials": "omit",
             "headers": {
+                "User-Agent": "Jan",
                 "Accept": "application/json, text/plain, */*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Content-Type": "application/json",
-                "X-Client-Type": "web"
+                "X-Client-Type": "web",
+                "X-Language-Code": "nl",
+                "X-Locale-Code": "nl-NL",
+                "X-Session-Id": "9ab129ca-fb16-4115-a6fb-ca2d4318f801",
+                "X-Device-Id": "3064deaf-fcfe-44c2-aae6-d9049ddbbe7f",
+                "Sec-GPC": "1",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "cross-site",
+                "Priority": "u=0"
             },
             "referrer": "https://studygo.com/",
             "body": "{\"email\":\"" + gebruikersnaam + "\",\"password\":\"" + wachtwoord + "\"}",

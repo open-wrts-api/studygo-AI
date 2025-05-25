@@ -83,7 +83,7 @@ async function main() {
         if (!forum.ok) {
             throw new Error(`HTTP error! status: ${forum.status}`);
         }
-        if (forum.status === 404) {
+        if (forum.status === "404") {
             console.log("ACCOUNT DOOD");
             hook.error('Error', 'ACCOUNT DOOD', 'De bot waarschijnlijk is verbannen van studygo.');
         }

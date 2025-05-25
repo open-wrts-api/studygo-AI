@@ -45,6 +45,7 @@ async function get_token() {
 
         // Update localStorage
         token = result.auth_token.toString();
+        console.log("Token vernieuwd:", token);
         token_vernieuwen_datum = Number(result.renew_from);
         return result.auth_token.toString();
 

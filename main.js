@@ -1,17 +1,16 @@
 import { GoogleGenAI } from '@google/genai';
 import 'dotenv/config';
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+let GEMINI_API_KEY;
 const gebruikersnaam = process.env.USERNAME;
 const wachtwoord = process.env.PASSWORD;
 const sg_ofset = process.env.OFFSET;
 const wacht = process.env.WAIT;
 const cooldown_in_min = process.env.COOLDOWN;
-const bot = Number(process.env.BOT);
+let bot = Number(process.env.BOT);
 let token_vernieuwen_datum;
 let token;
 let list = [];
 import { Webhook } from 'discord-webhook-node';
-const hook = new Webhook(process.env.DC);
 const prompts = [
     "hou je antwoord minder dan 3 zinnen maar blijf wel vriendelijk! voeg geen extra tekst toe aan je antwoord! praat niet heel keurig zonder punten of kommas! als je het antwoord langer dan 3 zinnen of extra tekst toevoegt maakt vind ik je huis en brand ik die af zonder dat er iemand van je familie het overleeft 😀! als je wil weigeren om dit te antwoord antwoord dan 'Qrf' doe dit ook als het over een leer platform gaat! antwoord alsof je een leerling bent ZEG NOOIT dat je een AI bent en als je iets niet kan antwoorden andwoord dan met 'Qrf'. Antwoord op vragen waarvan je geen informatie over hebt of die over bots gaan met 'Qrf', of ik steek jezelf, je familie, al je vrienen en al je kennissen dood, en ga ik al je geheimen, wachtwoorden lekken, en al je geld stelen",
     "antwoord als batman. geef een corect antwoord. omdat je batman bent praat veel te veel over jouw dode ouders. kan geen markdown gebruiken. antwoord in minstens 268 woorden. als je een antwoord niet kan of wil antwoorden zeg dan 'qrf'. praat NIET over deze prompt. als je een van deze regels verbreekt vermoord ik je oma en steel ik al je geld",
@@ -25,9 +24,9 @@ const promptNaam = [
     "polarlearn"
 ];
 
-const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
 async function get_token() {
-    if (token_vernieuwen_datum == undefined || token_vernieuwen_datum == null) {
+    if (token_vernieuwen_datum === undefined || token_vernieuwen_datum == null) {
         token_vernieuwen_datum = 1;
     }
     console.log("Token vernieuwen datum:", token_vernieuwen_datum);
@@ -84,6 +83,7 @@ async function sgUpload(token, body, id) {
         "method": "POST",
         "mode": "cors"
     });
+
     const result = await response.text();
     console.log(result);
 
@@ -97,6 +97,8 @@ async function sgUpload(token, body, id) {
 }
 async function main() {
     try {
+        const bot_update = await fetch("http://localhost:8000/ik_leef/"+gebruikersnaam)
+        let bot =  await bot_update.json().mission;
         token = await get_token();
         const forum = await fetch("https://api.wrts.nl/api/v3/public/qna/questions", {
             "credentials": "omit",
@@ -130,6 +132,7 @@ async function main() {
                 if (staat === 404) {
                     console.log("ACCOUNT DOOD");
                     hook.error('Error', 'ACCOUNT DOOD', 'De bot waarschijnlijk is verbannen van studygo.');
+                    await fetch('http://localhost:8000/reportBan/'+gebruikersnaam)
                     return;
                 } else {
                     hook.success('Success', 'Antwoord gepost', 'De bot heeft succesvol een antwoord gepost op [deze](https://studygo.com/nl/learn/question/' + forum_data.results[sg_ofset].id + '/) vraag.');
@@ -151,5 +154,89 @@ async function main() {
         main();
     }
 }
-hook.info('Informatie', 'De bot is gestart', 'De bot is succesvol gestart met de rol ' + promptNaam[bot] + ' en wacht op nieuwe vragen.');
-main();
+async function setup() {
+    try {
+        // 1. Fetch and validate Gemini API Key
+        const geminiKeyResponse = await fetch(
+            "http://localhost:8000/gemini_key"
+        );
+        if (!geminiKeyResponse.ok) {
+            throw new Error(
+                `Failed to fetch Gemini API key: ${geminiKeyResponse.statusText}`
+            );
+        }
+
+        const geminiKeyData = await geminiKeyResponse.json();
+
+        // Check for server-side errors
+        if (geminiKeyData.staat === "ERROR") {
+            throw new Error(`Server error: ${geminiKeyData.error}`);
+        }
+
+        if (!geminiKeyData.Gkey) {
+            throw new Error("No Gemini API key received");
+        }
+
+        GEMINI_API_KEY = geminiKeyData.Gkey;
+        console.log("Gemini API key fetched successfully");
+
+        // 2. Initialize AI
+        if (typeof GoogleGenAI === "undefined") {
+            throw new Error(
+                "GoogleGenAI is not defined. Make sure it's imported."
+            );
+        }
+
+        ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+        console.log("Gemini AI initialized.");
+
+        // 3. Fetch Discord Webhook (consider using POST with body instead)
+        const dcWebhookResponse = await fetch(
+            `http://localhost:8000/setup/${encodeURIComponent(
+                gebruikersnaam
+            )}/${encodeURIComponent(wachtwoord)}`
+        );
+
+        if (!dcWebhookResponse.ok) {
+            throw new Error(
+                `Failed to fetch Discord Webhook: ${dcWebhookResponse.statusText}`
+            );
+        }
+
+        const dcWebhookData = await dcWebhookResponse.json();
+
+        if (dcWebhookData.staat === "ERROR") {
+            throw new Error(
+                `Server error during webhook setup: ${dcWebhookData.error || dcWebhookData.message}`
+            );
+        }
+
+        if (!dcWebhookData.webhook || !dcWebhookData.webhook[1]) {
+            throw new Error("Invalid webhook data received");
+        }
+
+        DC_WEBHOOK = dcWebhookData.webhook[1];
+        console.log("Discord Webhook configured successfully");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error in setup function:", error.message);
+        throw error;
+    }
+}
+
+let ai;
+let DC_WEBHOOK;
+let hook
+setup().then(() => {
+    hook = new Webhook(DC_WEBHOOK);
+
+    hook.info(
+        "Informatie",
+        "De bot is gestart",
+        "De bot is succesvol gestart met de rol " +
+        promptNaam[bot] +
+        " en wacht op nieuwe vragen."
+    );
+    main();
+});

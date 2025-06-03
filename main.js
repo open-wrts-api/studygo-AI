@@ -1,5 +1,7 @@
 import { GoogleGenAI } from '@google/genai';
 import 'dotenv/config';
+import uuid from 'uuid';
+const randomUseragent = require('random-useragent');
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const gebruikersnaam = process.env.USERNAME;
 const wachtwoord = process.env.PASSWORD;
@@ -24,7 +26,6 @@ const promptNaam = [
     "batman",
     "polarlearn"
 ];
-
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 async function get_token() {
     if (token_vernieuwen_datum == undefined || token_vernieuwen_datum == null) {
@@ -36,15 +37,15 @@ async function get_token() {
         const response = await fetch("https://api.wrts.nl/api/v3/auth/get_token", {
             "credentials": "omit",
             "headers": {
-                "User-Agent": "Jan",
+                "User-Agent": randomUseragent.getRandom(),
                 "Accept": "application/json, text/plain, */*",
                 "Accept-Language": "en-US,en;q=0.5",
                 "Content-Type": "application/json",
                 "X-Client-Type": "web",
                 "X-Language-Code": "nl",
                 "X-Locale-Code": "nl-NL",
-                "X-Session-Id": "9ab129ca-fb16-4115-a6fb-ca2d4318f801",
-                "X-Device-Id": "3064deaf-fcfe-44c2-aae6-d9049ddbbe7f",
+                "X-Session-Id": uuid.v4(),
+                "X-Device-Id": uuid.v4(),
                 "Sec-GPC": "1",
                 "Sec-Fetch-Dest": "empty",
                 "Sec-Fetch-Mode": "cors",

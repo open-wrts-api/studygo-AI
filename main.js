@@ -87,6 +87,8 @@ async function sgUpload(token, body, id) {
     });
     const result = await response.text();
     console.log(result);
+    console.log(response);
+
 
     if (response.ok) {
         console.log("Successfully posted answer");
@@ -109,6 +111,7 @@ async function main() {
             "method": "GET",
             "mode": "cors"
         });
+        console.log("forum:", forum);
 
         if (!forum.ok) {
             throw new Error(`HTTP error! status: ${forum.status}`);

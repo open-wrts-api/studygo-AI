@@ -1,17 +1,59 @@
-// app/page.tsx
 "use server";
 
-import prisma from "../lib/prisma";
+import prisma from "@/lib/prisma";
+import BotList from "./botList";
+
+async function get_user_data(token) {
+  let myHeaders = new Headers();
+  myHeaders.append("x-auth-token", await token);
+
+  try {
+    const response = await fetch(
+      "https://api.wrts.nl/api/v3/get_user_data",
+      {
+        method: "GET",
+        headers: myHeaders,
+        redirect: "follow"
+      }
+    );
+
+    let result = await response.json();
+
+    return result;
+  } catch (error) { throw error; }
+}
+
+async function get_token(email, wachtwoord) {
+
+  let myHeaders = new Headers();
+  myHeaders.append("Sec-Fetch-Mode", "cors");
+  myHeaders.append("Sec-Fetch-Site", "cross-site");
+  myHeaders.append("Origin", "https://studygo.com");
+  myHeaders.append("Referer", "https://studygo.com");
+  myHeaders.append("Sec-Fetch-Dest", "empty");
+
+  const response = await fetch(
+    "https://api.wrts.nl/api/v3/auth/get_token?email=" + email + "&password=" + wachtwoord,
+    {
+      method: "POST",
+      headers: myHeaders,
+      redirect: "follow"
+    }
+  );
+
+  const result = await response.json();
+  console.log(result);
+  return result.auth_token.toString();
+}
 
 export async function createBot(formData) {
   try {
-    const name = formData.get("name")?.toString();
     const email = formData.get("email")?.toString();
     const password = formData.get("password")?.toString();
     const promptString = formData.get("prompt")?.toString();
     const webhookUrl = formData.get("webhookUrl")?.toString();
 
-    if (!name || !email || !password || !promptString || !webhookUrl) {
+    if (!email || !password || !promptString || !webhookUrl) {
       throw new Error("Vul alle verplichte velden in");
     }
 
@@ -21,15 +63,20 @@ export async function createBot(formData) {
     if (isNaN(prompt)) {
       throw new Error("Prompt moet een geldig getal zijn");
     }
-
+    const botToken = await get_token(email, password);
+    const userData = await get_user_data(botToken);
+    const name = userData?.first_name;
+    if (!name) {
+      throw new Error("Kon de botnaam niet ophalen. Controleer de login gegevens.");
+    }
     const newBot = await prisma.bot.create({
       data: {
-        name,
-        email,
-        password,
-        prompt,
-        webhookUrl,
-        nextRun: new Date(),
+        name: name,
+        email: email,
+        password: password,
+        prompt: prompt,
+        botToken: botToken,
+        webhookUrl: webhookUrl,
         banned: false,
       },
     });
@@ -64,7 +111,7 @@ export default async function Home() {
             </span>
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Beheer de Studygo Bot
+            Beheer de Studygo Bots
           </p>
         </div>
 
@@ -75,18 +122,6 @@ export default async function Home() {
           </h2>
 
           <form action={createBot} className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Bot Naam
-              </label>
-              <input
-                name="name"
-                required
-                className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-                placeholder="Jan henk oosterrijk"
-              />
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Email
@@ -115,7 +150,7 @@ export default async function Home() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Prompt int
+                Prompt nummer
               </label>
               <input
                 name="prompt"
@@ -125,7 +160,7 @@ export default async function Home() {
               />
             </div>
 
-            <div className="col-span-2">
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Webhook URL
               </label>
@@ -146,73 +181,9 @@ export default async function Home() {
             </button>
           </form>
         </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-colors duration-200">
-          <div className="px-6 py-5 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-            <h3 className="text-lg font-semibold dark:text-gray-200">
-              Geregistreerde Bots ({bots.length})
-            </h3>
-          </div>
-
-          {bots.length === 0 ? (
-            <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-              Geen bots gevonden in de database
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-gray-700">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Naam</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Email</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Status</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Volgende Run</th>
-                    <th className="px-6 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Webhook</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {bots.map((bot) => (
-                    <tr
-                      key={bot.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                    >
-                      <td className="px-6 py-4 dark:text-gray-300">{bot.name}</td>
-                      <td className="px-6 py-4 dark:text-gray-300">{bot.email}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-sm ${bot.banned
-                          ? 'bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-500'
-                          : 'bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-500'
-                          }`}>
-                          {bot.banned ? "Geblokkeerd" : "Actief"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 dark:text-gray-300">
-                        {new Date(bot.nextRun).toLocaleDateString("nl-NL", {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </td>
-                      <td className="px-6 py-4 break-all max-w-xs">
-                        <a
-                          href={bot.webhookUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 hover:underline"
-                        >
-                          {bot.webhookUrl}
-                        </a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        <BotList bots={bots} />
       </div>
     </main>
+
   );
 }

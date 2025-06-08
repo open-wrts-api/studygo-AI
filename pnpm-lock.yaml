@@ -8,9 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@openwrts/libwrts':
+        specifier: ^1.1.0
+        version: 1.1.0
       '@prisma/client':
-        specifier: 6.8.2
-        version: 6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3)
+        specifier: 6.9.0
+        version: 6.9.0(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3)
       next:
         specifier: 15.3.3
         version: 15.3.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -342,8 +345,11 @@ packages:
     engines: {node: '>=10'}
     deprecated: This functionality has been moved to @npmcli/fs
 
-  '@prisma/client@6.8.2':
-    resolution: {integrity: sha512-5II+vbyzv4si6Yunwgkj0qT/iY0zyspttoDrL3R4BYgLdp42/d2C8xdi9vqkrYtKt9H32oFIukvyw3Koz5JoDg==}
+  '@openwrts/libwrts@1.1.0':
+    resolution: {integrity: sha512-v8OIMlLGbvWqjNsz94PJfBpRrTo7b3MSNL6RslL8ZTOs8KWS8zlgvLvi4++Zgv3OsJFXdwggPCKdhOeqaSdeMQ==}
+
+  '@prisma/client@6.9.0':
+    resolution: {integrity: sha512-Gg7j1hwy3SgF1KHrh0PZsYvAaykeR0PaxusnLXydehS96voYCGt1U5zVR31NIouYc63hWzidcrir1a7AIyCsNQ==}
     engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
@@ -2470,7 +2476,9 @@ snapshots:
       rimraf: 3.0.2
     optional: true
 
-  '@prisma/client@6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3)':
+  '@openwrts/libwrts@1.1.0': {}
+
+  '@prisma/client@6.9.0(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3)':
     optionalDependencies:
       prisma: 6.8.2(typescript@5.8.3)
       typescript: 5.8.3

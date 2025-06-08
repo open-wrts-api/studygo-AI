@@ -17,7 +17,6 @@ model Bot {
   email      String   @unique
   password   String
   botToken   String   @unique @default(cuid())
-  nextRun    DateTime @default(now())
   banned     Boolean  @default(false)
   webhookUrl String
   createdAt  DateTime @default(now())

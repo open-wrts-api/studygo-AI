@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import BotList from "./botList";
-import { Bot } from "@/generated/prisma";
 import toast from "react-hot-toast";
 import { createBot, getBots } from "./actions";
 import { useRouter } from "next/navigation";
@@ -20,7 +19,7 @@ async function handleCreateBot(formData: FormData) {
 export default function Home() {
   const router = useRouter();
 
-  const [bots, setBots] = useState<Bot[]>([]);
+  const [bots, setBots] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -1,12 +1,11 @@
 "use client";
 import { useState } from "react";
 import EditBot from "./editBot";
-import type { Bot } from "@/generated/prisma";
 
-export default function BotList({ bots }: { bots: Bot[] }) {
+export default function BotList({ bots }: { bots: any[] }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
-    const [formData, setFormData] = useState<Partial<Bot>>({});
+    const [selectedBot, setSelectedBot] = useState<any>(null);
+    const [formData, setFormData] = useState<Partial<any>>({});
 
     const closeModal = () => {
         setIsModalOpen(false);

@@ -1,3 +1,4 @@
+"use server"
 import prisma from "@/lib/prisma";
 
 async function get_token(email: string, wachtwoord: string) {

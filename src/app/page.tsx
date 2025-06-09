@@ -1,105 +1,44 @@
-"use server";
+"use client";
 
-import prisma from "@/lib/prisma";
+import { useEffect, useState } from "react";
 import BotList from "./botList";
+import { Bot } from "@/generated/prisma";
+import toast from "react-hot-toast";
+import { createBot, getBots } from "./actions";
+import { useRouter } from "next/navigation";
 
-async function get_user_data(token) {
-  let myHeaders = new Headers();
-  myHeaders.append("x-auth-token", await token);
-
+async function handleCreateBot(formData: FormData) {
   try {
-    const response = await fetch(
-      "https://api.wrts.nl/api/v3/get_user_data",
-      {
-        method: "GET",
-        headers: myHeaders,
-        redirect: "follow"
+    await createBot(formData);
+    toast.success("Bot succesvol aangemaakt!");
+  } catch (error) {
+    console.error(error);
+    toast.error("Fout bij het aanmaken van de bot!");
+  }
+}
+
+export default function Home() {
+  const router = useRouter();
+
+  const [bots, setBots] = useState<Bot[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchBots() {
+      try {
+        const fetchedBots = await getBots();
+        setBots(fetchedBots);
+        router.refresh()
+      } catch (error) {
+        console.error("Fout bij het ophalen van bots:", error);
+        toast.error("Fout bij het ophalen van bots");
+      } finally {
+        setLoading(false);
       }
-    );
-
-    let result = await response.json();
-
-    return result;
-  } catch (error) { throw error; }
-}
-
-async function get_token(email, wachtwoord) {
-
-  let myHeaders = new Headers();
-  myHeaders.append("Sec-Fetch-Mode", "cors");
-  myHeaders.append("Sec-Fetch-Site", "cross-site");
-  myHeaders.append("Origin", "https://studygo.com");
-  myHeaders.append("Referer", "https://studygo.com");
-  myHeaders.append("Sec-Fetch-Dest", "empty");
-
-  const response = await fetch(
-    "https://api.wrts.nl/api/v3/auth/get_token?email=" + email + "&password=" + wachtwoord,
-    {
-      method: "POST",
-      headers: myHeaders,
-      redirect: "follow"
-    }
-  );
-
-  const result = await response.json();
-  console.log(result);
-  return result.auth_token.toString();
-}
-
-export async function createBot(formData) {
-  try {
-    const email = formData.get("email")?.toString();
-    const password = formData.get("password")?.toString();
-    const promptString = formData.get("prompt")?.toString();
-    const webhookUrl = formData.get("webhookUrl")?.toString();
-
-    if (!email || !password || !promptString || !webhookUrl) {
-      throw new Error("Vul alle verplichte velden in");
     }
 
-    // Convert prompt to integer
-    const prompt = parseInt(promptString, 10);
-
-    if (isNaN(prompt)) {
-      throw new Error("Prompt moet een geldig getal zijn");
-    }
-    const botToken = await get_token(email, password);
-    const userData = await get_user_data(botToken);
-    const name = userData?.first_name;
-    if (!name) {
-      throw new Error("Kon de botnaam niet ophalen. Controleer de login gegevens.");
-    }
-    const newBot = await prisma.bot.create({
-      data: {
-        name: name,
-        email: email,
-        password: password,
-        prompt: prompt,
-        botToken: botToken,
-        webhookUrl: webhookUrl,
-        banned: false,
-      },
-    });
-
-    return { success: true, message: "Bot succesvol aangemaakt", data: newBot };
-  } catch (error) {
-    console.error("Fout bij aanmaken bot:", error);
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "Onbekende fout",
-    };
-  }
-}
-
-export default async function Home() {
-  let bots = [];
-  try {
-    bots = await prisma.bot.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-  } catch (error) {
-    console.error("Fout bij het ophalen van bots:", error);
-  }
+    fetchBots();
+  }, []);
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 p-8">
@@ -121,7 +60,7 @@ export default async function Home() {
             Nieuwe Bot Aanmaken
           </h2>
 
-          <form action={createBot} className="grid grid-cols-2 gap-6">
+          <form action={handleCreateBot} className="grid grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Email
@@ -181,7 +120,14 @@ export default async function Home() {
             </button>
           </form>
         </div>
-        <BotList bots={bots} />
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">Bots laden...</p>
+          </div>
+        ) : (
+          <BotList bots={bots} />
+        )}
       </div>
     </main>
 

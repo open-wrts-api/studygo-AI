@@ -1,23 +1,24 @@
 "use client";
 import { useState } from "react";
 import EditBot from "./editBot";
+import type { Bot } from "@/generated/prisma";
 
-export default function BotList({ bots = [] }) {
+export default function BotList({ bots }: { bots: Bot[] }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedBot, setSelectedBot] = useState(null);
-    const [formData, setFormData] = useState({});
+    const [selectedBot, setSelectedBot] = useState<Bot | null>(null);
+    const [formData, setFormData] = useState<Partial<Bot>>({});
 
     const closeModal = () => {
         setIsModalOpen(false);
         setSelectedBot(null);
     };
 
-    const handleChange = (e) => {
+    const handleChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: { preventDefault: () => void; }) => {
         e.preventDefault();
         if (selectedBot?.id) {
             await EditBot({
@@ -27,7 +28,7 @@ export default function BotList({ bots = [] }) {
                     password: formData.password || undefined,
                     prompt: formData.prompt ? Number(formData.prompt) : selectedBot.prompt,
                     webhookUrl: formData.webhookUrl || selectedBot.webhookUrl,
-                    banned: formData.banned ? formData.banned === "true" : selectedBot.banned,
+                    banned: formData.banned ? formData.banned : selectedBot.banned,
                 },
             });
             closeModal();
